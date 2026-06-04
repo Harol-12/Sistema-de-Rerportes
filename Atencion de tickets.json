@@ -1,0 +1,357 @@
+{
+  "name": "Atencion de tickets",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "obtener-tickets-pendientes",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        -496
+      ],
+      "id": "9a2d462a-ef18-4894-90b4-850f8fdfbb43",
+      "name": "Webhook",
+      "webhookId": "bcf533f1-439e-46e4-95ad-92fdfcdee5f2"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    t.id_ticket,\n    t.nombre_solicitante,\n    t.departamento,\n    t.categoria,\n    t.prioridad,\n    t.descripcion,\n    t.estado,\n    t.fecha_creacion,\n    COALESCE(tc.nombre, 'GIH') AS nombre_tecnico\nFROM tickets t\nLEFT JOIN tecnicos tc ON tc.id_tecnico = t.id_tecnico\nWHERE t.estado = 'Pendiente' OR t.estado = 'Atendiendo'\nORDER BY t.fecha_creacion ASC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        16,
+        -400
+      ],
+      "id": "a2dc2b02-1bab-414d-91d7-a3d5bc2d89ae",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "uSb6xCmAuIrZ0Joq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        336,
+        -304
+      ],
+      "id": "d722c019-6da3-4251-969a-fbc269dab600",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "atender-ticket",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -320,
+        -176
+      ],
+      "id": "0b65ec8c-abd2-4db5-853f-be15d204417b",
+      "name": "Webhook1",
+      "webhookId": "db8e38a2-06ce-40ce-a836-b55ee6fd7455"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tickets",
+          "mode": "list",
+          "cachedResultName": "tickets"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "estado": "Atendiendo",
+            "id_ticket": "={{ $json.body.id_ticket }}",
+            "fecha_asignacion": "={{ $now }}",
+            "id_tecnico": "={{ $json.body.id_tecnico }}"
+          },
+          "matchingColumns": [
+            "id_ticket"
+          ],
+          "schema": [
+            {
+              "id": "id_ticket",
+              "displayName": "id_ticket",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre_solicitante",
+              "displayName": "nombre_solicitante",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "correo_solicitante",
+              "displayName": "correo_solicitante",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "departamento",
+              "displayName": "departamento",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id_tecnico",
+              "displayName": "id_tecnico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_creacion",
+              "displayName": "fecha_creacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha_asignacion",
+              "displayName": "fecha_asignacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_cierre",
+              "displayName": "fecha_cierre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "observaciones",
+              "displayName": "observaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -16,
+        -112
+      ],
+      "id": "8d992921-8952-43fb-9e98-81fef8306bfe",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "uSb6xCmAuIrZ0Joq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"mensaje\": \"Ticket actualizado con éxito\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        112
+      ],
+      "id": "19cfa64e-be8d-4753-9278-5806d7178093",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.correo_solicitante }}",
+        "subject": "=Ticket #{{ $json.id_ticket }} en proceso",
+        "message": "=<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ffe0b2; border-radius: 8px; background-color: #ffffff;\">\n    \n    <div style=\"background-color: #fb8c00; padding: 25px; text-align: left; border-radius: 8px 8px 0 0;\">\n        <h2 style=\"color: #ffffff; margin: 0; font-size: 22px;\">🛠️ Tu reporte está en camino</h2>\n    </div>\n\n    <div style=\"padding: 30px; color: #444444; line-height: 1.6;\">\n        <p style=\"font-size: 16px; margin-top: 0;\">Hola <strong>{{ $json.nombre_solicitante }}</strong>,</p>\n        \n        <p style=\"font-size: 15px;\">Te informamos que tu reporte sobre:</p>\n        \n        <div style=\"background-color: #fff3e0; border-left: 4px solid #fb8c00; padding: 15px; margin: 20px 0; color: #e65100; font-weight: bold;\">\n            \"{{ $json.descripcion }}\"\n        </div>\n\n        <div style=\"text-align: center; padding: 10px; background-color: #fff9f1; border: 1px dashed #fb8c00; border-radius: 5px; margin-bottom: 20px;\">\n            <p style=\"margin: 0; font-size: 16px; color: #fb8c00;\"><strong>Estado:</strong> Siendo atendido por un técnico</p>\n        </div>\n\n        <p style=\"font-size: 15px;\">Nuestro equipo técnico ya está trabajando en una solución.</p>\n        \n        <hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 25px 0;\">\n        \n        <p style=\"font-size: 14px; color: #777777;\">\n            Gracias por tu paciencia,<br>\n            <strong>GIH Hospital Regional de Cobán</strong>\n        </p>\n    </div>\n\n    <div style=\"background-color: #fff3e0; padding: 15px; text-align: center; font-size: 12px; color: #e65100; border-radius: 0 0 8px 8px;\">\n        Soporte Técnico en Tiempo Real\n    </div>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        0
+      ],
+      "id": "f00461b1-5a2d-4e40-83b9-96a8e20e373d",
+      "name": "Send a message",
+      "webhookId": "120d2f16-1fea-4433-a48a-080f5b3c1599",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LGxwCEL2lQxZRkvA",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "016939d3-2281-42ac-8b91-6ad4997c6329",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7db7dd39e35b941b8bb0abf54dd388c7c6bcfb2bd3469e1bdfd74f0ab9c054a0"
+  },
+  "id": "cN7fy7ypgztRxddT",
+  "tags": []
+}
