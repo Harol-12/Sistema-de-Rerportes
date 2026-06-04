@@ -1,0 +1,641 @@
+{
+  "name": "Cierre_Tickets",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        320,
+        -272
+      ],
+      "id": "02cbac55-532e-48e9-a352-69bc8a978bdb",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Update rows in a table').item.json.correo_solicitante }}",
+        "subject": "=Ticket #$ {{ $('Update rows in a table').item.json.id_ticket }}Finalizado con Éxito",
+        "message": "=<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #c3e6cb; border-radius: 8px; overflow: hidden; background-color: #ffffff;\">\n    \n    <div style=\"background-color: #28a745; padding: 25px; text-align: left; border-radius: 8px 8px 0 0;\">\n        <h2 style=\"color: #ffffff; margin: 0; font-size: 22px;\">¡Hola! Tu ticket ha sido resuelto</h2>\n    </div>\n\n    <div style=\"padding: 30px; color: #444444; line-height: 1.6;\">\n        <p style=\"font-size: 16px; margin-top: 0;\">Te informamos que el ticket de soporte <strong>#{{ $('Update rows in a table').item.json.id_ticket }}</strong> ha sido marcado como <strong style=\"color: #28a745;\">Finalizado</strong>.</p>\n        \n        <div style=\"background-color: #f4faf5; border-left: 5px solid #28a745; padding: 20px; margin: 25px 0; border-radius: 0 5px 5px 0;\">\n            <p style=\"margin: 5px 0; font-size: 15px;\"><strong>👨‍🔧 Técnico:</strong> GIH</p>\n            <p style=\"margin: 5px 0; font-size: 15px;\"><strong>✅ Estado:</strong> Solucionado</p>\n            <p style=\"margin: 5px 0; font-size: 15px;\"><strong>📅 Fecha de Cierre:</strong> {{ $now.format('dd/MM/yyyy HH:mm') }}</p>\n            <p style=\"margin: 15px 0 0 0; font-size: 13px; color: #155724; border-top: 1px solid #c3e6cb; padding-top: 10px;\"><strong>GIH, Hospital Regional de Cobán</strong></p>\n        </div>\n\n        <p style=\"font-size: 15px;\">Gracias por utilizar nuestro sistema de HelpDesk IT. Si el inconveniente persiste, no dudes en contactarnos nuevamente.</p>\n        \n        <hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 25px 0;\">\n        \n        <p style=\"font-size: 11px; color: #888888; text-align: center;\">\n            Este es un mensaje automático generado por el sistema de gestión de tickets.\n        </p>\n    </div>\n\n    <div style=\"background-color: #f1f1f1; padding: 10px; text-align: center; font-size: 12px; color: #666666;\">\n        Gestión de Incidentes Hospitalarios (GIH)\n    </div>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        80,
+        -384
+      ],
+      "id": "17828781-dcac-4366-914a-e642eb524353",
+      "name": "Send a message",
+      "webhookId": "39bbe7ea-9bb8-465d-8843-f299a5992a8f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LGxwCEL2lQxZRkvA",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1WMpZLAhs473MrkzgCnNrcapiIgXn90FwWpfuSpFg7t4",
+          "mode": "list",
+          "cachedResultName": "Control_Tickets_IT",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WMpZLAhs473MrkzgCnNrcapiIgXn90FwWpfuSpFg7t4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WMpZLAhs473MrkzgCnNrcapiIgXn90FwWpfuSpFg7t4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID Ticket": "={{ $('Webhook').item.json.body.ticket_id }}",
+            "Estado": "Finalizado",
+            "Fecha de Finalizacion": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "ID Ticket"
+          ],
+          "schema": [
+            {
+              "id": "ID Ticket",
+              "displayName": "ID Ticket",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Jefe/a de Servicio",
+              "displayName": "Jefe/a de Servicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Correo ",
+              "displayName": "Correo ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Servicio",
+              "displayName": "Servicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Categoria",
+              "displayName": "Categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Descripcion",
+              "displayName": "Descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha de Creacion",
+              "displayName": "Fecha de Creacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha de Finalizacion",
+              "displayName": "Fecha de Finalizacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -160,
+        -400
+      ],
+      "id": "1dc6e50b-06ab-4148-9291-8a2f249d2f1c",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6EOBPmTSdbMpTgvh",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "finalizar-tickets",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -688,
+        -384
+      ],
+      "id": "444d6e3c-7706-4551-b647-1008b7f9a15f",
+      "name": "Webhook",
+      "webhookId": "78475428-f336-45cd-8232-67566e7674d2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tickets",
+          "mode": "list",
+          "cachedResultName": "tickets"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "estado": "Finalizado",
+            "id_ticket": "={{ $json.body.ticket_id }}",
+            "fecha_cierre": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "id_ticket"
+          ],
+          "schema": [
+            {
+              "id": "id_ticket",
+              "displayName": "id_ticket",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre_solicitante",
+              "displayName": "nombre_solicitante",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "correo_solicitante",
+              "displayName": "correo_solicitante",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "departamento",
+              "displayName": "departamento",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "id_tecnico",
+              "displayName": "id_tecnico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha_creacion",
+              "displayName": "fecha_creacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha_asignacion",
+              "displayName": "fecha_asignacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha_cierre",
+              "displayName": "fecha_cierre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "observaciones",
+              "displayName": "observaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -432,
+        -416
+      ],
+      "id": "1a5b5c85-439b-4c76-9390-cd4ae3ec8245",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "uSb6xCmAuIrZ0Joq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "consultar-finalizados",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -688,
+        -160
+      ],
+      "id": "a57863dd-d401-4a8b-bf8f-9edd5f317dcf",
+      "name": "Webhook1",
+      "webhookId": "602f78e3-545c-4803-b8a9-f21f9b41ed8a"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    t.id_ticket,\n    t.nombre_solicitante,\n    t.departamento,\n    t.categoria,\n    t.descripcion,\n    t.fecha_cierre,\n    COALESCE(tc.nombre, 'GIH') AS nombre_tecnico\nFROM tickets t\nLEFT JOIN tecnicos tc ON tc.id_tecnico = t.id_tecnico\nWHERE t.estado = 'Finalizado'\nORDER BY t.id_ticket DESC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -464,
+        -224
+      ],
+      "id": "26eaed76-122b-4f94-be02-c4d3aefe7920",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "uSb6xCmAuIrZ0Joq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -272,
+        -160
+      ],
+      "id": "d47d3288-423f-4bcf-9ff4-d7e1d28f0675",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "guardar-ficha-pdf",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -736,
+        96
+      ],
+      "id": "3d0ee5d8-3f9e-45a4-94f6-86c86bdbc2a1",
+      "name": "Recibe",
+      "webhookId": "78c20c05-f6ef-43e9-9f19-6c98aba82d3e"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "=body.archivo_base64",
+        "options": {
+          "fileName": "={{ $json.body.nombre_archivo }}",
+          "mimeType": "application/pdf"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -368,
+        16
+      ],
+      "id": "be30d5fc-a10f-4232-a49f-39dbfe9afb42",
+      "name": "Convierte"
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1iwqq71p8tjPIJ3WF6GSUEdQtSATVUoIi",
+          "mode": "list",
+          "cachedResultName": "Fichas_Tecnicas",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1iwqq71p8tjPIJ3WF6GSUEdQtSATVUoIi"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -112,
+        48
+      ],
+      "id": "b5984686-0f1a-4d6c-90c1-c81b802f7898",
+      "name": "guarda",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "N3opcadWk7QzD1R9",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "\n{\n \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        96,
+        48
+      ],
+      "id": "e1d3e635-51f9-4128-95c5-5a02ba38b6bd",
+      "name": "Respond to Webhook2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recibe": {
+      "main": [
+        [
+          {
+            "node": "Convierte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convierte": {
+      "main": [
+        [
+          {
+            "node": "guarda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "guarda": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2d4dbb66-8b55-4780-a608-e360388b1c16",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7db7dd39e35b941b8bb0abf54dd388c7c6bcfb2bd3469e1bdfd74f0ab9c054a0"
+  },
+  "id": "JeKZ7q22OuWj0Gvn",
+  "tags": []
+}

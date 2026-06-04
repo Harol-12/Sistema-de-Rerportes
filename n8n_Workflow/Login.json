@@ -1,0 +1,171 @@
+{
+  "name": "Login",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "login-tecnico",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -704,
+        -384
+      ],
+      "id": "a6a4d554-b0a8-41d0-b172-be8bed12c61c",
+      "name": "Webhook",
+      "webhookId": "05bbd02f-e2f7-4928-abf9-1e0b59660096"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, username, nombre_tecnico FROM usuarios \nWHERE username = '{{ $json.body.usuario }}' \nAND password = '{{ $json.body.password }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -416,
+        -304
+      ],
+      "id": "59addf24-1c22-4f65-8ddd-f08d7acbe6e3",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "uSb6xCmAuIrZ0Joq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "12d5c0d9-da94-427c-9d60-e71e1050ae4d",
+              "leftValue": "={{ $json.username }}",
+              "rightValue": "={{ $node[\"Webhook\"].json.body.usuario }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c5733fb3-f1c7-4529-9eda-77552b46c0fc",
+              "leftValue": "={{ $('Webhook').item.json.body.password }}",
+              "rightValue": "={{ $node[\"Webhook\"].json.body.password }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -160,
+        -224
+      ],
+      "id": "d05c0470-f343-420e-9042-e71829862d43",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"autenticado\": true,\n  \"mensaje\": \"¡Acceso concedido!\",\n  \"usuario\": \"{{ $node['Execute a SQL query'].json['nombre_tecnico'] }}\",\n  \"id\": \"{{ $node['Execute a SQL query'].json['id'] }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        176,
+        -384
+      ],
+      "id": "7f6faf9f-47d6-4cd8-bf32-d3d4a1394dca",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"autenticado\": false,\n  \"mensaje\": \"Usuario o contraseña incorrectos\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        176,
+        -32
+      ],
+      "id": "b2e4cc58-a4b5-478e-b33f-e89ec3b29b0f",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bc2c27fb-5a55-4763-93f6-8ca48e58aae2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7db7dd39e35b941b8bb0abf54dd388c7c6bcfb2bd3469e1bdfd74f0ab9c054a0"
+  },
+  "id": "7YByAsN9JlnCWzlz",
+  "tags": []
+}

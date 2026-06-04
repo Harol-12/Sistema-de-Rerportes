@@ -1,0 +1,430 @@
+{
+  "name": "Crear Ticket",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crear-ticket",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": ""
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        -384
+      ],
+      "id": "adeb77ec-77b4-4760-a43d-63c766cb7c33",
+      "name": "Recepcion de Ticket",
+      "webhookId": "368c523c-aa7f-4aa7-baaa-9f53bbfa5d8f",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tickets",
+          "mode": "list",
+          "cachedResultName": "tickets"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "estado": "Pendiente",
+            "fecha_creacion": "={{ $now }}",
+            "nombre_solicitante": "={{ $json.body.nombre }}",
+            "correo_solicitante": "={{ $json.body.correo }}",
+            "departamento": "={{ $json.body.departamento }}",
+            "categoria": "={{ $json.body.categoria }}",
+            "prioridad": "={{ $json.body.prioridad }}",
+            "descripcion": "={{ $json.body.descripcion }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_ticket",
+              "displayName": "id_ticket",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nombre_solicitante",
+              "displayName": "nombre_solicitante",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "correo_solicitante",
+              "displayName": "correo_solicitante",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "departamento",
+              "displayName": "departamento",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "id_tecnico",
+              "displayName": "id_tecnico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha_creacion",
+              "displayName": "fecha_creacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_asignacion",
+              "displayName": "fecha_asignacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha_cierre",
+              "displayName": "fecha_cierre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "observaciones",
+              "displayName": "observaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        128,
+        -272
+      ],
+      "id": "88fa31ac-0a19-4b41-82ce-d7fb489e7193",
+      "name": "Registrar Ticket en BD",
+      "credentials": {
+        "postgres": {
+          "id": "uSb6xCmAuIrZ0Joq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"mensaje\": \"Ticket #{{ $json.id_ticket }} creado exitosamente\",\n  \"estado\": \"exitoso\",\n  \"solicitante\": \"{{ $json.nombre_solicitante }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        464,
+        -144
+      ],
+      "id": "eeee803c-579b-4de9-8674-4237c63d978f",
+      "name": "Confirmar Recepcion a APP"
+    },
+    {
+      "parameters": {
+        "fromEmail": "gihhoscoban254@gmail.com",
+        "toEmail": "={{ $('Recepcion de Ticket').item.json.body.correo }}",
+        "subject": "=Confirmacion de ticket# {{ $json['ID Ticket'] }}",
+        "html": "=<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; background-color: #ffffff;\">\n    \n    <div style=\"background-color: #1a73e8; padding: 25px; text-align: left;\">\n        <h2 style=\"color: #ffffff; margin: 0; font-size: 24px;\">¡Hola, {{ $('Recepcion de Ticket').item.json.body.nombre }}!</h2>\n    </div>\n\n    <div style=\"padding: 30px; color: #444444; line-height: 1.6;\">\n        <p style=\"font-size: 16px; margin-top: 0;\">Hemos recibido tu reporte sobre:</p>\n        \n        <blockquote style=\"background-color: #f8f9fa; border-left: 4px solid #1a73e8; padding: 15px; margin: 20px 0; font-style: italic; color: #555;\">\n            \"{{ $('Recepcion de Ticket').item.json.body.descripcion }}\"\n        </blockquote>\n\n        <p style=\"font-size: 16px;\">Tu caso ha sido registrado con los siguientes detalles:</p>\n        \n        <div style=\"background-color: #f1f3f4; padding: 20px; border-radius: 5px;\">\n            <ul style=\"list-style: none; padding: 0; margin: 0;\">\n                <li style=\"margin-bottom: 10px;\"><strong>📍 Departamento:</strong> {{ $('Recepcion de Ticket').item.json.body.departamento }}</li>\n                <li style=\"margin-bottom: 10px;\"><strong>🏷️ Categoría:</strong> {{ $('Recepcion de Ticket').item.json.body.categoria }}</li>\n                <li style=\"margin-bottom: 0;\"><strong>⚡ Prioridad:</strong> <span style=\"color: #1a73e8; font-weight: bold;\">{{ $('Recepcion de Ticket').item.json.body.prioridad }}</span></li>\n            </ul>\n        </div>\n\n        <p style=\"margin-top: 25px; font-size: 15px;\">Pronto recibirás una actualización con tu número de ticket asignado.</p>\n        \n        <hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 25px 0;\">\n        \n        <p style=\"font-size: 14px; color: #777777;\">\n            Saludos,<br>\n            <strong>GIH Hospital Regional de Cobán</strong>\n        </p>\n    </div>\n\n    <div style=\"background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #999999;\">\n        Este es un mensaje automático de nuestro sistema de HelpDesk IT.\n    </div>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1008,
+        -16
+      ],
+      "id": "3e66f469-9373-498e-a419-0f22422ed0a7",
+      "name": "Notificar Solicitande por correo",
+      "webhookId": "dfcc71ba-2815-4f77-93cb-549a407aaa4d",
+      "credentials": {
+        "smtp": {
+          "id": "kFtl5LSBFBpkhUpz",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WMpZLAhs473MrkzgCnNrcapiIgXn90FwWpfuSpFg7t4",
+          "mode": "list",
+          "cachedResultName": "Control_Tickets_IT",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WMpZLAhs473MrkzgCnNrcapiIgXn90FwWpfuSpFg7t4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WMpZLAhs473MrkzgCnNrcapiIgXn90FwWpfuSpFg7t4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID Ticket": "={{ $('Registrar Ticket en BD').item.json.id_ticket }}",
+            "Categoria": "={{ $('Recepcion de Ticket').item.json.body.categoria }}",
+            "Prioridad": "={{ $('Recepcion de Ticket').item.json.body.prioridad }}",
+            "Descripcion": "={{ $('Recepcion de Ticket').item.json.body.descripcion }}",
+            "Fecha de Creacion": "={{ $('Registrar Ticket en BD').item.json.fecha_creacion }}",
+            "Estado": "Pendiente",
+            "Jefe/a de Servicio": "={{ $('Recepcion de Ticket').item.json.body.nombre }}",
+            "Correo ": "={{ $('Recepcion de Ticket').item.json.body.correo }}",
+            "Servicio": "={{ $('Recepcion de Ticket').item.json.body.departamento }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID Ticket",
+              "displayName": "ID Ticket",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Jefe/a de Servicio",
+              "displayName": "Jefe/a de Servicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Correo ",
+              "displayName": "Correo ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Servicio",
+              "displayName": "Servicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Categoria",
+              "displayName": "Categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Descripcion",
+              "displayName": "Descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha de Creacion",
+              "displayName": "Fecha de Creacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        -96
+      ],
+      "id": "94ba3cdd-3761-426c-b60c-2d4b13aca691",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6EOBPmTSdbMpTgvh",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Recepcion de Ticket": {
+      "main": [
+        [
+          {
+            "node": "Registrar Ticket en BD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Ticket en BD": {
+      "main": [
+        [
+          {
+            "node": "Confirmar Recepcion a APP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar Recepcion a APP": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Notificar Solicitande por correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d1ce1a1c-63f5-4112-b1b2-e5ee393c1776",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7db7dd39e35b941b8bb0abf54dd388c7c6bcfb2bd3469e1bdfd74f0ab9c054a0"
+  },
+  "id": "hXpb8oeNXOsrXRAN",
+  "tags": []
+}
