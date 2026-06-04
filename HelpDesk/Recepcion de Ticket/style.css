@@ -1,0 +1,192 @@
+/* --- VARIABLES --- */
+:root {
+    --primary-blue: #1a73e8;
+    --dark-blue: #1557b0;
+    --success-green: #2e7d32;
+    --danger-red: #d32f2f;
+    --bg-light: #f8f9fa;
+    --text-gray: #444;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #eee;
+    margin: 0; padding: 0;
+}
+
+.main-container {
+    max-width: 1250px;
+    margin: 20px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Cabecera */
+.header-section { text-align: center; margin-bottom: 30px; }
+.header-section h1 { margin: 5px 0; font-size: 34px; color: var(--primary-blue); font-weight: 800; }
+.header-line { width: 300px; height: 3px; background-color: var(--primary-blue); margin: 4px auto 15px auto; border-radius: 2px; }
+
+/* Estadísticas */
+.stats-container { display: flex; gap: 20px; margin-bottom: 30px; justify-content: center; }
+.stat-card { 
+    background: white; padding: 20px; border-radius: 12px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; 
+    min-width: 220px; border-top: 5px solid var(--primary-blue);
+}
+.stat-number { font-size: 36px; font-weight: 800; color: var(--primary-blue); display: block; }
+.stat-label { color: #666; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+
+/* Controles superiores */
+.table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px; }
+.search-box { 
+    padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; 
+    width: 100%; max-width: 400px; outline: none; transition: 0.3s;
+}
+.search-box:focus { border-color: var(--primary-blue); }
+
+.export-btn {
+    background-color: var(--success-green); color: white; padding: 10px 20px;
+    border: none; border-radius: 6px; cursor: pointer; font-weight: bold;
+    display: flex; align-items: center; gap: 8px;
+}
+
+/* Tabla */
+table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; }
+th { background-color: var(--primary-blue); color: white; padding: 15px; text-align: left; font-size: 13px; }
+td { padding: 12px 15px; border-bottom: 1px solid #eee; color: var(--text-gray); font-size: 14px; }
+tr:hover { background-color: #f1f7ff; }
+
+/* Botones de Acción en Tabla */
+.btn-accion {
+    border: none; border-radius: 6px; color: white; padding: 8px 14px;
+    cursor: pointer; font-size: 12px; font-weight: bold;
+    display: inline-flex; align-items: center; gap: 6px; transition: 0.3s;
+}
+.btn-visualizar { background-color: var(--danger-red); }
+.btn-descargar { background-color: var(--success-green); }
+
+/* CORRECCIÓN: Estado habilitado para el botón Drive */
+.btn-descargar:not(:disabled) {
+    opacity: 1 !important;
+    cursor: pointer !important;
+}
+
+/* --- ESTILOS MODAL (LIMPIOS Y UNIFICADOS) --- */
+.modal {
+    display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+    width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    overflow-y: auto; padding: 20px 0;
+}
+
+.modal-content {
+    background-color: white; margin: auto; padding: 30px;
+    border-radius: 15px; width: 90%; max-width: 850px;
+    border-top: 10px solid var(--primary-blue); position: relative;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.section-title {
+    font-size: 11px; text-transform: uppercase; color: var(--primary-blue);
+    font-weight: bold; margin: 15px 0 8px 0; border-bottom: 1px solid #e8f0fe;
+    padding-bottom: 3px;
+}
+
+.row-flex { display: flex; gap: 15px; margin-bottom: 5px; }
+.col-flex { flex: 1; }
+
+.ficha-form label { font-size: 12px; font-weight: bold; color: #555; margin-bottom: 4px; display: block; }
+.ficha-form input, .ficha-form textarea {
+    width: 100%; padding: 8px 10px; margin-bottom: 10px; border: 1px solid #ccc;
+    border-radius: 6px; background: var(--bg-light); box-sizing: border-box; font-size: 13px;
+}
+
+/* Rejilla para los checkboxes (LIMPIADA Y UNIFICADA a 5 columnas) */
+.checklist-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 8px; background: #f8f9fa; padding: 10px;
+    border-radius: 8px; border: 1px solid #e0e0e0;
+}
+.checklist-grid label {
+    font-size: 11px !important; margin: 0 !important;
+    cursor: pointer; display: flex; align-items: center; gap: 4px;
+}
+
+/* Botón de cerrar (X) */
+.close-modal {
+    position: absolute; right: 20px; top: 15px; font-size: 28px;
+    font-weight: bold; color: #999; cursor: pointer;
+}
+.close-modal:hover { color: #ff4d4d; }
+
+/* Pie del modal */
+.modal-footer {
+    display: flex; justify-content: flex-end; gap: 15px;
+    margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;
+}
+
+.btn-cancel { background: #f1f3f4; color: #555; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+.btn-save { background: var(--primary-blue); color: white; padding: 10px 25px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
+
+/* --- CORRECCIÓN FINAL: Estilos para el botón nav-btn (Volver al Panel Técnico) --- */
+.nav-btn {
+    background-color: #555; /* Gris oscuro */
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px; /* Bordes redondeados */
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none; /* Quita el subrayado */
+    display: inline-block;
+    transition: 0.3s;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Sombra suave para efecto de elevación */
+}
+.nav-btn:hover {
+    background-color: #333; /* Gris más oscuro al pasar el mouse */
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15); /* Sombra más pronunciada en hover */
+}
+
+
+
+
+
+/* Modifica esta parte en tu CSS */
+.header-logos-container {
+    display: flex;
+    justify-content: center; /* Cambiamos de space-between a center */
+    align-items: center;
+    gap: 40px;               /* Este número controla la distancia exacta (ajústalo a tu gusto) */
+    margin-bottom: 20px;
+    max-width: 900px;        /* Limitamos el ancho para que no se expandan a las orillas */
+    margin-left: auto;       /* Centra el contenedor completo */
+    margin-right: auto;      /* Centra el contenedor completo */
+}
+
+.header-logo-img {
+    height: 90px;            /* Un poquito más pequeños para que luzcan mejor cerca del texto */
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;          /* Evita que los logos se aplasten */
+}
+
+.header-title-wrapper {
+    text-align: center;
+    min-width: fit-content;  /* Asegura que el texto mantenga su lugar */
+}
+
+/* Ajuste para que la línea azul no se rompa */
+.header-line { 
+    width: 200px; 
+    height: 3px; 
+    background-color: var(--primary-blue); 
+    margin: 4px auto; 
+    border-radius: 2px; 
+}
+
+/* Reset de margen para el h1 dentro de la nueva estructura */
+.header-title-wrapper h1 {
+    margin: 0;
+}

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="panel_tecnico.css">
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- NAVBAR -->
+        <nav class="navbar">
+            <div class="navbar-brand">
+                
+               
+            </div>
+
+            <div class="navbar-right">
+                <span class="nav-user" id="nav-usuario">👤 Técnico</span>
+                <a href="../login/index.html" class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</a>
+            </div>
+        </nav>
+
+        <!-- HERO -->
+        <header class="hero">
+            
+            <h1>Hospital Regional de Cobán</h1>
+            <div class="hero-badge">Gestión Informática Hospitalaria</div>
+            <p class="hero-subtitle">Panel de Soporte Técnico · GIH</p>
+        </header>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <div class="panel-card">
+
+                <!-- CABECERA -->
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <div class="section-icon">
+                            <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        </div>
+                        <div>
+                            <h2 class="section-title">Tickets Pendientes</h2>
+                            <span class="ticket-count" id="ticket-count">Cargando...</span>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button onclick="cargarTickets()" class="btn-secondary" id="btn-refresh">
+                            <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                            Actualizar Lista
+                        </button>
+                        <button onclick="window.location.href='../RecepcionTicket/recepcion_tickets.html'" class="btn-secondary btn-create">
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Crear Nuevo Ticket
+                        </button>
+                        <a href="../estadistica/Estadistica.html" class="btn-primary">
+                            Tickets en Proceso
+                            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- TABLA -->
+                <div class="table-wrapper">
+                    <table id="tabla-tickets">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Solicitante</th>
+                                <th>Servicio</th>
+                                <th>Categoría</th>
+                                <th>Descripción</th>
+                                <th>Prioridad</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpo-tabla">
+                            <tr>
+                                <td colspan="7" class="table-loading">
+                                    <div class="spinner"></div>
+                                    Cargando tickets...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL CONFIRMAR ATENDER -->
+    <div class="modal-backdrop" id="modal-backdrop">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="modal-title">¿Atender este ticket?</div>
+            <p class="modal-desc">
+                El ticket <strong id="modal-ticket-id"></strong> pasará al estado
+                <strong>En Proceso</strong> y se asignará a tu usuario.
+            </p>
+            <div class="modal-actions">
+                <button class="modal-btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="modal-btn-confirm" onclick="confirmarYAtender()">Sí, atender</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        /* ── CERRAR SESIÓN ── */
+        function cerrarSesion() {
+            localStorage.removeItem('usuario_nombre');
+            localStorage.removeItem('usuario_id');
+        }
+
+        /* ── CARGAR NOMBRE DEL TÉCNICO ── */
+        window.onload = function() {
+            // Leer parámetros de la URL (respaldo para file:// origins)
+            const params = new URLSearchParams(window.location.search);
+            const nombreURL = params.get('nombre');
+            const idURL     = params.get('id');
+
+            // Si vienen por URL, guardarlos en localStorage y limpiar la URL
+            if (nombreURL) {
+                localStorage.setItem('usuario_nombre', nombreURL);
+                localStorage.setItem('usuario_id',     idURL || '');
+                // Limpiar URL sin recargar la página
+                history.replaceState(null, '', window.location.pathname);
+            }
+
+            const nombre = localStorage.getItem('usuario_nombre');
+            if (nombre) document.getElementById('nav-usuario').textContent = '👤 ' + nombre;
+            cargarTickets();
+        };
+
+        /* ── 1. CARGAR TICKETS PENDIENTES ── */
+        async function cargarTickets() {
+            const tbody      = document.getElementById('cuerpo-tabla');
+            const countEl    = document.getElementById('ticket-count');
+            const btnRefresh = document.getElementById('btn-refresh');
+
+            tbody.innerHTML = `<tr><td colspan="7" class="table-loading"><div class="spinner"></div>Actualizando lista...</td></tr>`;
+            countEl.textContent = 'Cargando...';
+            btnRefresh.classList.add('loading');
+            btnRefresh.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5678/webhook/obtener-tickets-pendientes?t=' + Date.now());
+                const tickets  = await response.json();
+
+                const soloPendientes = tickets.filter(t =>
+                    t.estado && t.estado.toString().trim().toLowerCase() === 'pendiente'
+                );
+
+                tbody.innerHTML = '';
+
+                if (soloPendientes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="table-empty"><span class="empty-icon">📋</span>No hay tickets pendientes por ahora.</td></tr>`;
+                    countEl.textContent = '0 tickets pendientes';
+                    return;
+                }
+
+                countEl.textContent = soloPendientes.length + ' ticket' + (soloPendientes.length !== 1 ? 's' : '') + ' pendiente' + (soloPendientes.length !== 1 ? 's' : '');
+
+                soloPendientes.forEach(ticket => {
+                    const fila = `
+                        <tr>
+                            <td><span class="ticket-id">#${ticket.id_ticket}</span></td>
+                            <td>${ticket.nombre_solicitante}</td>
+                            <td>${ticket.departamento}</td>
+                            <td><span class="badge-categoria">${ticket.categoria || '—'}</span></td>
+                            <td class="desc-cell" title="${ticket.descripcion}">${ticket.descripcion}</td>
+                            <td><span class="badge-prioridad badge-${ticket.prioridad}">${ticket.prioridad}</span></td>
+                            <td><button class="btn-atender" onclick="confirmarAtender(${ticket.id_ticket})">Atender</button></td>
+                        </tr>`;
+                    tbody.innerHTML += fila;
+                });
+
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="7" class="table-error">❌ Error al conectar con el servidor. Verifica que n8n esté en ejecución.</td></tr>`;
+                countEl.textContent = 'Error al cargar';
+            } finally {
+                btnRefresh.classList.remove('loading');
+                btnRefresh.disabled = false;
+            }
+        }
+
+        /* ── 2. MODAL ── */
+        let ticketPendienteId = null;
+
+        function confirmarAtender(id) {
+            ticketPendienteId = id;
+            document.getElementById('modal-ticket-id').textContent = '#' + id;
+            document.getElementById('modal-backdrop').classList.add('open');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-backdrop').classList.remove('open');
+            ticketPendienteId = null;
+        }
+
+        async function confirmarYAtender() {
+            const id = ticketPendienteId;
+            cerrarModal();
+            if (id !== null) await atenderTicket(id);
+        }
+
+        document.getElementById('modal-backdrop').addEventListener('click', function(e) {
+            if (e.target === this) cerrarModal();
+        });
+
+        /* ── 3. ATENDER TICKET ── */
+        async function atenderTicket(id) {
+            // Datos del técnico logueado desde localStorage
+            const nombreTecnico = localStorage.getItem('usuario_nombre') || 'Técnico de Turno';
+            const idTecnico     = localStorage.getItem('usuario_id')     || null;
+
+            try {
+                const response = await fetch('http://localhost:5678/webhook/atender-ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id_ticket:      id,
+                        nombre_tecnico: nombreTecnico,  // ← nombre real del técnico
+                        id_tecnico:     idTecnico       // ← id del técnico
+                    })
+                });
+
+                if (response.ok) {
+                    mostrarToast('success', '✅ Ticket #' + id + ' asignado a ' + nombreTecnico);
+                    setTimeout(() => cargarTickets(), 500);
+                } else {
+                    mostrarToast('error', '❌ Error al actualizar el ticket #' + id);
+                }
+            } catch (error) {
+                console.error(error);
+                mostrarToast('error', '❌ No se pudo conectar con n8n');
+            }
+        }
+
+        /* ── 4. TOAST ── */
+        function mostrarToast(tipo, mensaje) {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast ' + tipo;
+            toast.textContent = mensaje;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+    </script>
+
+</body>
+</html>

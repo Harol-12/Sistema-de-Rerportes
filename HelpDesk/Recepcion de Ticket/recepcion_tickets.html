@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reportar Nuevo Ticket - GIH</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="top-nav">
+        <a href="C:/HelpDesk/index/login/index.html" class="admin-btn">Inciar Sesion🔒</a>
+    </div>
+
+    <div class="form-container">
+
+    <div class="form-container">
+        
+        <h2>Reportar Incidencia Técnica</h2>
+        <form id="ticket-form">
+            
+            <div class="input-group">
+                <label>Jefe/a de Servicio</label>
+                <input type="text" id="nombre" placeholder="Ej: Harol Rax" required>
+            </div>
+
+            <div class="input-group">
+                <label>Correo Electrónico</label>
+                <input type="email" id="correo" placeholder="Ej: gihhoscoban254@gmail.com" required>
+            </div>
+
+            <div class="input-group">
+                <label>Servicio / Unidad</label>
+                <input type="text" id="departamento" placeholder="Ej: Pediatría, Rayos X..." required>
+                <small class="help-text">Escribe el nombre del servicio donde te encuentras.</small>
+            </div>
+
+            <div class="two-columns">
+                <div class="input-group">
+                    <label>Categoría</label>
+                    <select id="categoria" required>
+                        <option value="Impresora">Impresora</option>
+                        <option value="Software">Software / Sistema</option>
+                        <option value="Hardware">Hardware / PC</option>
+                        <option value="Red">Red / Internet</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Prioridad</label>
+                    <select id="prioridad" required>
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Descripción del Problema</label>
+                <textarea id="descripcion" rows="4" placeholder="Describe brevemente el fallo..." required></textarea>
+            </div>
+
+            <button type="button" onclick="enviarTicket()" class="login-btn">Enviar Ticket</button>
+        </form>
+        <p id="mensaje-respuesta"></p>
+    </div>
+
+    <script>
+        async function enviarTicket() {
+            const btn = document.querySelector('.login-btn');
+            const msg = document.getElementById('mensaje-respuesta');
+            
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                correo: document.getElementById('correo').value,
+                departamento: document.getElementById('departamento').value,
+                categoria: document.getElementById('categoria').value,
+                prioridad: document.getElementById('prioridad').value,
+                descripcion: document.getElementById('descripcion').value
+            };
+
+            if(!datos.nombre || !datos.correo || !datos.descripcion) {
+                alert("Por favor llena los campos obligatorios");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Enviando...";
+
+            try {
+                // REEMPLAZAMOS EL URL POR EL WEBHOOK 
+                const response = await fetch('http://localhost:5678/webhook-test/crear-ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                if (response.ok) {
+                    msg.style.color = "green";
+                    msg.innerText = "¡Ticket enviado con éxito!";
+                    document.getElementById('ticket-form').reset();
+                } else {
+                    throw new Error();
+                }
+            } catch (error) {
+                msg.style.color = "red";
+                msg.innerText = "Error al enviar. Verifica n8n.";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Enviar Ticket";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>DEBUG: Conexión n8n a Postgres</title>
+    <style>
+        body { font-family: 'Courier New', monospace; background: #1a1a1a; color: #00ff00; padding: 20px; }
+        .console { background: #000; border: 2px solid #333; padding: 15px; border-radius: 8px; max-height: 500px; overflow-y: auto; }
+        .ticket-item { border-bottom: 1px solid #333; padding: 10px 0; }
+        .atendiendo { color: #fffb00; font-weight: bold; text-transform: uppercase; }
+        .boton-test { background: #00ff00; color: #000; padding: 15px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; }
+        .boton-test:hover { background: #00cc00; }
+        .badge { padding: 2px 5px; border-radius: 3px; font-size: 12px; margin-left: 10px; }
+        .badge-info { background: #0051ff; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>🔍 Verificador de Sincronización</h1>
+    <p>Este panel muestra los datos CRUDOS que vienen de tu base de datos a través de n8n.</p>
+
+    <button class="boton-test" onclick="ejecutarDiagnostico()">
+        🚀 LANZAR PRUEBA DE LECTURA (GET)
+    </button>
+
+    <div class="console" id="log-salida">
+        > Esperando ejecución...
+    </div>
+
+<script>
+async function ejecutarDiagnostico() {
+        const salida = document.getElementById('log-salida');
+        salida.innerHTML = "> 📡 Consultando n8n (Buscando estado: ATENDIENDO)...<br>";
+
+        try {
+            // Usamos timestamp para evitar que el navegador guarde datos viejos
+            const url = `http://localhost:5678/webhook/obtener-tickets-pendientes?t=${Date.now()}`;
+            const response = await fetch(url);
+            const tickets = await response.json();
+
+            // --- EL FILTRO CLAVE ---
+            // Solo dejamos pasar los que digan "Atendiendo" (sin importar espacios o mayúsculas)
+            const filtrados = tickets.filter(t => 
+                t.estado && t.estado.toString().trim().toLowerCase() === 'atendiendo'
+            );
+
+            salida.innerHTML = `> ✅ Conexión exitosa. Recibidos ${tickets.length} en total. <br>`;
+            salida.innerHTML += `> 🎯 <b>Filtrados: ${filtrados.length} tickets en proceso.</b><br><hr>`;
+
+            if (filtrados.length === 0) {
+                salida.innerHTML += "> ⚠️ NO SE ENCONTRARON TICKETS 'ATENDIENDO'.<br>";
+                salida.innerHTML += "> Revisa en pgAdmin si guardaste los cambios en la columna 'estado'.";
+                return;
+            }
+
+            filtrados.forEach(t => {
+                salida.innerHTML += `
+                    <div class="ticket-item">
+                        <span style="color: #ffff00;">[ID: #${t.id_ticket}]</span> 
+                        - <b>Solicitante:</b> ${t.nombre_solicitante} 
+                        - <b>Estado:</b> "${t.estado}"
+                        <br>
+                        <small style="color: #666;">JSON: ${JSON.stringify(t)}</small>
+                    </div>
+                `;
+            });
+
+        } catch (error) {
+            salida.innerHTML += `<br><span style="color:red;">❌ ERROR: ${error.message}</span>`;
+        }
+    }
+</script>
+
+</body>
+</html>

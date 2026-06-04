@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de tickets GIH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── AUTOCOMPLETE SERVICIO ── */
+        .autocomplete-wrapper {
+            position: relative;
+        }
+
+        .autocomplete-wrapper input {
+            width: 100%;
+        }
+
+        .autocomplete-list {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1.5px solid #1a73e8;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(26,115,232,0.15);
+            z-index: 999;
+            max-height: 220px;
+            overflow-y: auto;
+            animation: dropIn 0.15s ease both;
+        }
+
+        @keyframes dropIn {
+            from { opacity:0; transform:translateY(-6px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        .autocomplete-list.open { display: block; }
+
+        .autocomplete-item {
+            padding: 10px 14px;
+            font-size: 13.5px;
+            color: #1a2332;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.15s;
+            border-bottom: 1px solid #f0f4f9;
+        }
+
+        .autocomplete-item:last-child { border-bottom: none; }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: #e8f0fe;
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        .autocomplete-item mark {
+            background: none;
+            color: #1a73e8;
+            font-weight: 700;
+        }
+
+        .autocomplete-empty {
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        /* Badge de servicio seleccionado */
+        .servicio-badge {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            padding: 5px 12px;
+            background: #e8f0fe;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a73e8;
+            width: fit-content;
+        }
+
+        .servicio-badge.visible { display: inline-flex; }
+
+        .servicio-badge button {
+            background: none;
+            border: none;
+            color: #1a73e8;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            padding: 0 2px;
+            opacity: 0.7;
+        }
+
+        .servicio-badge button:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-slideshow" id="slideshow">
+        <div class="bg-slide active"></div>
+        <div class="bg-slide"></div>
+        <div class="bg-slide"></div>
+        <div class="bg-slide"></div>
+    </div>
+    <div class="bg-overlay"></div>
+
+    <div class="page-wrapper">
+
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <div class="brand-text">
+                    <div class="brand-name"></div>
+                    <div class="brand-sub"></div>
+                </div>
+            </div>
+            <a href="../login/index.html" class="btn-login">
+                <span>🔒</span> Iniciar Sesión
+            </a>
+        </nav>
+
+        <header class="hero">
+            <h1>Hospital Regional de Cobán</h1>
+            <div class="hero-badge">Gestión Informática Hospitalaria</div>
+            <p class="hero-subtitle">Envía tu reporte técnico al equipo de soporte</p>
+        </header>
+
+        <main class="form-wrapper">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                        </svg>
+                    </div>
+                    <span class="form-card-title">Reporte Técnico</span>
+                </div>
+
+                <div class="form-card-body">
+                    <form id="ticket-form" novalidate>
+
+                        <div class="input-group">
+                            <label>Jefe/a de Servicio</label>
+                            <input type="text" id="nombre" placeholder="" required>
+                        </div>
+
+                        <div class="input-group" id="group-correo">
+                            <label>Correo Electrónico</label>
+                            <div class="input-icon-wrapper">
+                                <input type="email" id="correo" placeholder="@gmail.com" required autocomplete="email">
+                                <span class="input-status-icon"></span>
+                            </div>
+                            <span class="field-msg">⚠ Ingresa un correo electrónico válido</span>
+                        </div>
+
+                        <!-- ── SERVICIO CON AUTOCOMPLETE ── -->
+                        <div class="input-group" id="group-departamento">
+                            <label>Servicio / Unidad</label>
+                            <div class="autocomplete-wrapper">
+                                <input type="text" id="departamento-input"
+                                    placeholder=""
+                                    autocomplete="off" required>
+                                <div class="autocomplete-list" id="autocomplete-list"></div>
+                            </div>
+                            <!-- Campo oculto que guarda el valor validado -->
+                            <input type="hidden" id="departamento">
+                            <div class="servicio-badge" id="servicio-badge">
+                                <span id="servicio-badge-text"></span>
+                                <button type="button" onclick="limpiarServicio()" title="Cambiar servicio">✕</button>
+                            </div>
+                            <small class="help-text">Escribe para buscar el servicio donde te encuentras.</small>
+                        </div>
+
+                        <div class="two-columns">
+                            <div class="input-group">
+                                <label>Categoría</label>
+                                <select id="categoria" required>
+                                    <option value="Impresora">Seleccionar</option>
+                                    <option value="Impresora">🖨️ Impresora</option>
+                                    <option value="Computadora">💻 Computadora</option>
+                                    <option value="Mantenimiento preventivo">🔧 Mantenimiento preventivo</option>
+                                    <option value="Telefono">📞 Teléfono</option>
+                                    <option value="Red o internet">🌐 Red o Internet</option>
+                                    <option value="SADC">🏥 SADC</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Prioridad</label>
+                                <select id="prioridad" required>
+                
+                                    <option value="Baja">🟢 Baja</option>
+                                    <option value="Media" selected>🟡 Media</option>
+                                    <option value="Alta">🔴 Alta</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Descripción del Problema</label>
+                            <textarea id="descripcion" rows="4" placeholder="Describe brevemente el fallo o la solicitud..." required></textarea>
+                        </div>
+
+                        <button type="button" onclick="enviarTicket()" class="submit-btn" id="submit-btn">
+                            Enviar Ticket
+                            <svg viewBox="0 0 24 24">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+
+                    </form>
+                    <p id="mensaje-respuesta"></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="slide-indicators" id="indicators"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

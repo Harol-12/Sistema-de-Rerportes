@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tickets en Proceso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="panel_tecnico.css">
+    <style>
+        .btn-continuar {
+            padding: 7px 16px;
+            background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+            color: white; border: none; border-radius: 8px;
+            font-size: 12.5px; font-weight: 700;
+            font-family: 'Outfit', sans-serif; cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4,0,0.2,1); white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(26,115,232,0.3);
+        }
+        .btn-continuar:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(26,115,232,0.4); }
+        .btn-continuar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .badge-proceso {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;
+            background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;
+        }
+        .badge-proceso::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%;
+            background: #f97316; animation: pulse 1.5s ease infinite;
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="brand-text">
+                <div class="brand-name"></div>
+                <div class="brand-sub"></div>
+            </div>
+        </div>
+        <div class="navbar-right">
+            <span class="nav-user" id="nav-usuario">👤 Técnico</span>
+            <a href="../login/index.html" class="btn-logout">Cerrar Sesión</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Hospital Regional de Cobán</h1>
+        <div class="hero-badge">Gestión Informática Hospitalaria</div>
+        <p class="hero-subtitle">GIH</p>
+    </header>
+
+    <main class="main-content">
+        <div class="panel-card">
+            <div class="section-header">
+                <div class="section-title-group">
+                    <div class="section-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Tickets en Proceso</h2>
+                        <span class="ticket-count" id="ticket-count">Cargando...</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <a href="panel_tecnico.html" class="btn-secondary">
+                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                        Volver a Pendientes
+                    </a>
+                    <button onclick="cargarTickets()" class="btn-secondary" id="btn-refresh">
+                        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                        Actualizar Lista
+                    </button>
+                    <a href="../estadistica/Estadistica.html" class="btn-primary">
+                        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        Ver Estadísticas
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="tabla-tickets">
+                    <thead>
+                        <tr>
+                            <th>NO</th>
+                            <th>Solicitante</th>
+                            <th>Departamento</th>
+                            <th>Categoría</th>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-tabla">
+                        <tr><td colspan="7" class="table-loading"><div class="spinner"></div>Cargando tickets...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL CONFIRMAR -->
+<div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-box">
+        <div class="modal-icon" style="background:#dbeafe;">
+            <svg viewBox="0 0 24 24" style="stroke:#1a73e8;">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+        </div>
+        <div class="modal-title">¿Mover ticket a Estadísticas?</div>
+        <p class="modal-desc">
+            El ticket <strong id="modal-ticket-id"></strong> se moverá a
+            <strong>Estadísticas</strong> para completar la ficha técnica y finalizar el proceso.
+        </p>
+        <div class="modal-actions">
+            <button class="modal-btn-cancel" onclick="cerrarModal()">Cancelar</button>
+            <button class="modal-btn-confirm"
+                style="background:linear-gradient(135deg,#1a73e8 0%,#1557b0 100%); box-shadow:0 3px 10px rgba(26,115,232,0.3);"
+                onclick="confirmarYContinuar()">
+                Sí, continuar →
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const URL_LISTAR  = 'http://localhost:5678/webhook/obtener-tickets-pendientes';
+    /* ── Este webhook cambia el estado del ticket a "estadistica" en la BD ── */
+    const URL_MOVER   = 'http://localhost:5678/webhook/mover-a-estadistica';
+
+    window.onload = function() {
+        const nombre = localStorage.getItem('usuario_nombre');
+        if (nombre) document.getElementById('nav-usuario').textContent = '👤 ' + nombre;
+        cargarTickets();
+    };
+
+    async function cargarTickets() {
+        const tbody      = document.getElementById('cuerpo-tabla');
+        const countEl    = document.getElementById('ticket-count');
+        const btnRefresh = document.getElementById('btn-refresh');
+
+        tbody.innerHTML = `<tr><td colspan="7" class="table-loading"><div class="spinner"></div>Actualizando...</td></tr>`;
+        btnRefresh.disabled = true;
+
+        try {
+            const response = await fetch(URL_LISTAR + '?t=' + Date.now());
+            const tickets  = await response.json();
+            const enAtencion = tickets.filter(t =>
+                t.estado && t.estado.toString().trim().toLowerCase() === 'atendiendo'
+            );
+
+            tbody.innerHTML = '';
+            if (enAtencion.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="table-empty"><span class="empty-icon">✅</span>No hay tickets en proceso.</td></tr>`;
+                countEl.textContent = '0 tickets en proceso';
+                return;
+            }
+
+            countEl.textContent = enAtencion.length + ' ticket' + (enAtencion.length !== 1 ? 's' : '') + ' en proceso';
+            enAtencion.forEach(ticket => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="ticket-id">#${ticket.id_ticket}</span></td>
+                        <td>${ticket.nombre_solicitante || 'N/A'}</td>
+                        <td>${ticket.departamento || 'N/A'}</td>
+                        <td><span class="badge-categoria">${ticket.categoria || '—'}</span></td>
+                        <td class="desc-cell" title="${ticket.descripcion || ''}">${ticket.descripcion || 'Sin descripción'}</td>
+                        <td><span class="badge-proceso">En Proceso</span></td>
+                        <td>
+                            <button class="btn-continuar" id="btn-cont-${ticket.id_ticket}"
+                                onclick="confirmarContinuar(${ticket.id_ticket}, '${ticket.correo_solicitante || ''}')">
+                                Continuar →
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+        } catch (error) {
+            tbody.innerHTML = `<tr><td colspan="7" class="table-error">❌ Error al conectar con n8n.</td></tr>`;
+            countEl.textContent = 'Error';
+        } finally {
+            btnRefresh.disabled = false;
+        }
+    }
+
+    let ticketPendienteId    = null;
+    let ticketPendienteCorreo = null;
+
+    function confirmarContinuar(id, correo) {
+        ticketPendienteId     = id;
+        ticketPendienteCorreo = correo;
+        document.getElementById('modal-ticket-id').textContent = '#' + id;
+        document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    function cerrarModal() {
+        document.getElementById('modal-backdrop').classList.remove('open');
+        ticketPendienteId = null; ticketPendienteCorreo = null;
+    }
+
+    async function confirmarYContinuar() {
+        const id     = ticketPendienteId;
+        const correo = ticketPendienteCorreo;
+        cerrarModal();
+        if (id === null) return;
+
+        /* Deshabilitar btn mientras procesa */
+        const btnCont = document.getElementById('btn-cont-' + id);
+        if (btnCont) { btnCont.disabled = true; btnCont.textContent = 'Moviendo...'; }
+
+        const nombreTecnico = localStorage.getItem('usuario_nombre') || 'Técnico de Turno';
+
+        try {
+            /* ── Llamar webhook que cambia estado en la BD a "estadistica" ── */
+            const res = await fetch(URL_MOVER, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ticket_id:      id,
+                    correo:         correo,
+                    tecnico_nombre: nombreTecnico,
+                    nuevo_estado:   'estadistica'
+                })
+            });
+
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+
+            /* Guardar info en localStorage para que Estadística sepa que hay ficha pendiente */
+            const pendientes = JSON.parse(localStorage.getItem('fichas_pendientes') || '{}');
+            pendientes[id] = { correo, tecnico: nombreTecnico, timestamp: Date.now() };
+            localStorage.setItem('fichas_pendientes', JSON.stringify(pendientes));
+
+            mostrarToast('success', '✅ Ticket #' + id + ' movido a Estadísticas');
+            setTimeout(() => { window.location.href = '../estadistica/Estadistica.html'; }, 1200);
+
+        } catch (err) {
+            mostrarToast('error', '❌ Error al mover el ticket. Verifica n8n.');
+            if (btnCont) { btnCont.disabled = false; btnCont.textContent = 'Continuar →'; }
+        }
+    }
+
+    document.getElementById('modal-backdrop').addEventListener('click', function(e) {
+        if (e.target === this) cerrarModal();
+    });
+
+    function mostrarToast(tipo, mensaje) {
+        const toast = document.getElementById('toast');
+        toast.className = 'toast ' + tipo;
+        toast.textContent = mensaje;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+</script>
+</body>
+</html>
